@@ -1,5 +1,5 @@
 
-# Ease Bot
+# Ease Bot (DESCONTINUADO)
 
 🌩 Boost your sales with the complete Ease Bot. Perfect for your store, accompanying Ticket and Auth system.
 
