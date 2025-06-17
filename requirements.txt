@@ -1,0 +1,5 @@
+requests
+disnake
+pyopenssl
+efipay
+mercadopago

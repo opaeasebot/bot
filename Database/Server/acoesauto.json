@@ -1,0 +1,22 @@
+{
+    "repostagem": {
+        "sistema": false
+    },
+    "limpeza": {
+        "sistema": false,
+        "canal": [],
+        "delay": ""
+    },
+    "mensagens": {
+        "sistema": false,
+        "canal": [],
+        "content": "",
+        "delay": "",
+        "lastMSG": []
+    },
+    "reacoes": {
+        "sistema": false,
+        "canal": [],
+        "emoji": ""
+    }
+}

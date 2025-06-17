@@ -1,0 +1,20 @@
+{
+    "mercadopago": {
+        "habilitado": false,
+        "configurado": false,
+        "access_key": ""
+    },
+    "efi": {
+        "habilitado": false,
+        "configurado": false,
+        "clientID": "",
+        "clientSecret": "",
+        "chavePix": ""
+    },
+    "semiauto": {
+        "habilitado": false,
+        "configurado": false,
+        "chavePix": "",
+        "tipoPix": ""
+    }
+}

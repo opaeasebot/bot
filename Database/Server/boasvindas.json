@@ -1,0 +1,18 @@
+{
+    "sistema": false,
+    "mensagens": {
+        "boas-vindas": {
+            "mensagem": false,
+            "estiloMensagem": {
+                "content": ""
+            },
+            "canal": "",
+            "tempoApagar": ""
+        }
+    },
+    "funcoes": {
+        "autoRole": {
+            "membro": false
+        }
+    }
+}

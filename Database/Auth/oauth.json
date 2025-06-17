@@ -1,0 +1,17 @@
+{
+    "clientSecret": null,
+    "url": null,
+    "authorization": null,
+    "mensagem": {
+        "content": null,
+        "embed": {
+            "title": null,
+            "desc": null,
+            "color": null,
+            "iconURL": null,
+            "bannerURL": null,
+            "image": null,
+            "banner": null
+        }
+    }
+}

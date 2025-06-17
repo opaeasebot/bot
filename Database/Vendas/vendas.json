@@ -1,0 +1,19 @@
+{
+    "posicoes": {
+        "1": null,
+        "2": null,
+        "3": null
+    },
+    "instrucoes": "n\u00e3o se esque\u00e7a do feedback!",
+    "instructions MUDAR PARA instrucoes": {
+        "text": "",
+        "sistema": false
+    },
+    "marca": {
+        "cores": {
+            "principal": "000000",
+            "sec": "000000"
+        },
+        "url": ""
+    }
+}

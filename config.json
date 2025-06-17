@@ -1,0 +1,11 @@
+{
+    "token": "",
+    "owner": "",
+    "versao": "2.0",
+    "sistema": true,
+    "status": {
+        "name": "/panel",
+        "type": "online"
+    },
+    "server": ""
+}
