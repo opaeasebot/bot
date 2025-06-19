@@ -1,12 +1,10 @@
 import disnake
 from disnake import *
 from disnake.ext import commands
+from Events.OnBotStart import OnBotStart
 
 import json
 import os
-
-from Events.OnBotStart import *
-from Events.AcoesAutomaticas import executar_acoes
 
 with open("config.json") as file:
     config = json.load(file)
@@ -23,22 +21,7 @@ with open("config.json") as file:
 
 @bot.event
 async def on_ready():
-    os.system('cls') if os.name == "nt" else os.system("clear")
-    print()
-    print(banner)
-    print()
-    print(f"    Conectado em {bot.user.name} | {bot.user.id}")
-    print(f"    Servidores: {len(bot.guilds)}")
-    print(f"    Latência: {round(bot.latency * 1000)}ms")
-
-    type, activity = obter_status()
-    await bot.change_presence(
-        status=type,
-        activity=activity
-    )
-    alterar_descricao_bot(bot)
-    await startBotlogs(bot)
-    bot.loop.create_task(executar_acoes(bot))
+    await OnBotStart.StartBot(bot)
 
 bot.load_extension("Commands.Admin.Perms")
 bot.load_extension("Commands.Admin.Painel")
@@ -53,9 +36,9 @@ bot.load_extension("Commands.Admin.Plugins.Carrinho")
 bot.load_extension("Commands.Admin.Plugins.ECloud")
 bot.load_extension("Commands.Admin.Rendimentos")
 
-bot.load_extension("Functions.Config.FormasPagamento.EFIBank")
-bot.load_extension("Functions.Config.FormasPagamento.MercadoPago")
-bot.load_extension("Functions.Config.FormasPagamento.SemiAuto")
+bot.load_extension("Functions.FormasPagamento.EFIBank")
+bot.load_extension("Functions.FormasPagamento.MercadoPago")
+bot.load_extension("Functions.FormasPagamento.SemiAuto")
 
 bot.load_extension("Events.OnMemberJoin")
 bot.load_extension("Events.OnRegister")

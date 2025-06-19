@@ -12,9 +12,9 @@ import asyncio
 from datetime import *
 
 from Functions.CarregarEmojis import *
-from Functions.Config.FormasPagamentos import *
-from Functions.Config.FormasPagamento.Mensagens import *
-from Functions.Config.Produto import *
+from Functions.FormasPagamentos import *
+from Functions.FormasPagamento.Mensagens import *
+from Functions.Produto import *
 from Functions.VerificarPerms import *
 from Functions.VendaInfo import *
 
@@ -454,7 +454,7 @@ class Carrinho():
         with open("Database/Vendas/carrinhos.json", "w") as f:
             json.dump(db, f, indent=4)
 
-        await SincronizarMensagens(inter, carrinho["produtoID"])
+        await Produto.SincronizarMensagens(inter, carrinho["produtoID"])
 
     @staticmethod
     async def CriarCarrinho(inter: disnake.MessageInteraction, produtoID, campoID):
@@ -465,12 +465,12 @@ class Carrinho():
             a2 = ObterCampo(produtoID, campoID)
             if not a1 or not a2: 
                 await inter.edit_original_message(f"{negativo} Produto ou campo não encontrados")
-                await SincronizarMensagens(inter, produtoID)
+                await Produto.SincronizarMensagens(inter, produtoID)
                 return
             
         except:
             await inter.edit_original_message(f"{negativo} Não foi possível encontrar o produto.")
-            await SincronizarMensagens(inter, produtoID)
+            await Produto.SincronizarMensagens(inter, produtoID)
             return
 
         CarrinhoID = GerarString()
@@ -896,7 +896,7 @@ class Carrinho():
                     components=[
                         disnake.ui.Button(label="Mensagem do sistema", disabled=True)
                     ])
-            await SincronizarMensagens(inter, carrinho["produtoID"])
+            await Produto.SincronizarMensagens(inter, carrinho["produtoID"])
             return
 
         # se for automática, ele continua        
@@ -1139,7 +1139,7 @@ class CarrinhoExtension(commands.Cog):
         """
         Use to deliver a product to an user
         """
-        if not verificar_permissao(inter.user.id):
+        if not Perms.VerificarPerms(inter.user.id):
             return await inter.response.send_message(f"{negativo} Faltam permissões para executar essa ação.", ephemeral=True)
 
         if campo == "FaltamPermissoes":
@@ -1186,7 +1186,7 @@ class CarrinhoExtension(commands.Cog):
     ):
         produtos_db = ObterDatabase()
 
-        if verificar_permissao(inter.user.id):
+        if Perms.VerificarPerms(inter.user.id):
             suggestions = []
             for produto_id, produto_data in produtos_db.items():
                 nome_produto = produto_data["nome"]
@@ -1257,7 +1257,7 @@ class CarrinhoExtension(commands.Cog):
                 inline=True
             )
 
-            if verificar_permissao(inter.user.id):
+            if Perms.VerificarPerms(inter.user.id):
                 if venda["info"]["pagamento"]["paymentID"]:
                     paymentData = {
                         "id": venda["info"]["pagamento"]["paymentID"]
@@ -1285,7 +1285,7 @@ class CarrinhoExtension(commands.Cog):
             _, produtoID, campoID = inter.component.custom_id.split("_")
             embed, components = Entrega.ObterPainelGerenciarEstoque(inter, produtoID, campoID)
 
-            if verificar_permissao(inter.user.id):
+            if Perms.VerificarPerms(inter.user.id):
                 await inter.response.send_message(components=components, ephemeral=True)
             else: await inter.response.defer()
 
@@ -1309,7 +1309,7 @@ class CarrinhoExtension(commands.Cog):
             await inter.edit_original_message(mensagem)
 
         elif inter.component.custom_id.startswith("AprovarCarrinho_"):
-            if verificar_permissao(inter.user.id):
+            if Perms.VerificarPerms(inter.user.id):
                 await inter.response.edit_message(
                     f"{positivo} Produto pago com sucesso.\nAguarde um momento enquanto separamos seu pedido.",
                     embed=None, components=None
@@ -1323,10 +1323,10 @@ class CarrinhoExtension(commands.Cog):
 
         elif inter.component.custom_id.startswith("VendaInfo_"):
             vendaID = inter.component.custom_id.replace("VendaInfo_", "")
-            if verificar_permissao(inter.user.id):
+            if Perms.VerificarPerms(inter.user.id):
                 await inter.response.send_message(f"{carregarAnimado} Carregando informações", ephemeral=True)
                 
-                embed, components = ObterVendaPainel(inter, vendaID)
+                embed, components = Venda.ObterVendaPainel(inter, vendaID)
                 if embed == None:
                     return await inter.edit_original_message(f"{negativo} Venda `{vendaID}` não encontrada.")
 

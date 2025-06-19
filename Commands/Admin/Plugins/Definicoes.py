@@ -5,8 +5,8 @@ import json
 
 from Functions.CarregarEmojis import *
 from Functions.VerificarPerms import *
-from Functions.GerenciarCargosCanais import *
-from Functions.Config.FormasPagamentos import *
+from Utils.GerenciarCargosCanais import *
+from Functions.FormasPagamentos import *
 
 def ObterComponentsPainelInicial():
     components = [

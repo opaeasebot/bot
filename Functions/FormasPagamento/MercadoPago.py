@@ -7,7 +7,7 @@ import mercadopago
 from datetime import *
 
 from Functions.CarregarEmojis import *
-from Functions.Config.FormasPagamentos import *
+from Functions.FormasPagamentos import *
 
 class ConfigurarMercadoPagoModal(disnake.ui.Modal):
     def __init__(self):

@@ -47,7 +47,7 @@ class InfoProdutoCommand(commands.Cog):
         id: ID do Pedido
         """
 
-        if verificar_permissao(inter.user.id):
+        if Perms.VerificarPerms(inter.user.id):
             await inter.response.send_message(f"{carregarAnimado} Carregando informações", ephemeral=True)
             
             embed, components = ObterVendaPainel(inter, id)

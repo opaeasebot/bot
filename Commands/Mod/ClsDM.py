@@ -17,7 +17,7 @@ class ClsDMCommand(commands.Cog):
         user: usuário em que as mensagens serão apagadas
         """
         await inter.response.send_message(f"{carregarAnimado} Aguarde um momento", ephemeral=True)
-        if verificar_permissao(inter.user.id):
+        if Perms.VerificarPerms(inter.user.id):
             try:
                 dm_channel = await user.create_dm()
                 async for message in dm_channel.history(limit=100):

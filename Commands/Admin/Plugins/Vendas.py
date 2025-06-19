@@ -11,7 +11,7 @@ import os
 
 from Functions.CarregarEmojis import *
 from Functions.VerificarPerms import *
-from Functions.Config.Produto import *
+from Functions.Produto import *
 
 # Modais
 
@@ -339,7 +339,7 @@ class Produto():
                 embed, components = Produto.ObterPainelGerenciarProduto(inter, self.produtoID)
                 await inter.edit_original_message("", embed=embed, components=components)
                 await inter.followup.send(f"{positivo} Produto **{db[self.produtoID]["nome"]}** editado com sucesso", delete_after=3, ephemeral=True)
-                await SincronizarMensagens(inter, self.produtoID)
+                await Produto.SincronizarMensagens(inter, self.produtoID)
             else:
                 await inter.edit_original_message(f"{negativo} Você não informou corretamente a entrega automática.")
 
@@ -506,7 +506,7 @@ class Campo():
             
             embed, components = Campo.ObterPainelGerenciarCampo(inter, self.produtoID, campoID)
             await inter.edit_original_message("", embed=embed, components=components)
-            await SincronizarMensagens(inter, self.produtoID)
+            await Produto.SincronizarMensagens(inter, self.produtoID)
 
     class Editar(disnake.ui.Modal):
         def __init__(self, produtoID, campoID):
@@ -565,7 +565,7 @@ class Campo():
             
             embed, components = Campo.ObterPainelGerenciarCampo(inter, self.produtoID, self.campoID)
             await inter.edit_original_message("", embed=embed, components=components)
-            await SincronizarMensagens(inter, self.produtoID)
+            await Produto.SincronizarMensagens(inter, self.produtoID)
 
     class Condicoes(disnake.ui.Modal):
         def __init__(self, produtoID, campoID):
@@ -701,7 +701,7 @@ class Campo():
         with open("Database/Vendas/produtos.json", "w") as f:
             json.dump(db, f, indent=4)
 
-        await SincronizarMensagens(inter, produtoID)
+        await Produto.SincronizarMensagens(inter, produtoID)
 
 
     @staticmethod
@@ -844,8 +844,8 @@ class Campo():
                 embed, components = Campo.ObterPainelGerenciarCampo(inter, self.produtoID, self.campoID)
                 await inter.response.edit_message("", embed=embed, components=components)
                 await inter.followup.send(f"{positivo} Estoque adicionado com sucesso.\nInformações: ``{quantidade_texto}x {valor_fantasma}``", ephemeral=True)
-                await SincronizarMensagens(inter, self.produtoID)
-                await NotificarUserEstoque(inter, self.produtoID, self.campoID)
+                await Produto.SincronizarMensagens(inter, self.produtoID)
+                await Produto.NotificarUserEstoque(inter, self.produtoID, self.campoID)
 
         class AdicionarEstoqueModal(disnake.ui.Modal):
             def __init__(self, produtoID, campoID):
@@ -880,8 +880,8 @@ class Campo():
                 embed, components = Campo.ObterPainelGerenciarCampo(inter, self.produtoID, self.campoID)
                 await inter.edit_original_message("", embed=embed, components=components)
                 await inter.followup.send(f"{positivo} Estoque adicionado com sucesso.", ephemeral=True)
-                await SincronizarMensagens(inter, self.produtoID)
-                await NotificarUserEstoque(inter, self.produtoID, self.campoID)
+                await Produto.SincronizarMensagens(inter, self.produtoID)
+                await Produto.NotificarUserEstoque(inter, self.produtoID, self.campoID)
 
         @staticmethod
         def ObterPainelGerenciarEstoque(inter: disnake.MessageInteraction, produtoID: str, campoID: str):
@@ -935,8 +935,8 @@ class Campo():
             await inter.edit_original_message("", embed=embed, components=components)
             
             await inter.followup.send(f"{positivo} Estoque adicionado com sucesso.", ephemeral=True)
-            await SincronizarMensagens(inter, produtoID)
-            await NotificarUserEstoque(inter, produtoID, campoID)
+            await Produto.SincronizarMensagens(inter, produtoID)
+            await Produto.NotificarUserEstoque(inter, produtoID, campoID)
 
         @staticmethod
         def ApagarEstoque(produtoID: str, campoID: str):
@@ -1272,9 +1272,6 @@ class VendasCommand(commands.Cog):
         inter: disnake.ApplicationCommandInteraction,
         produto: str = commands.Param(description="Selecione um produto", autocomplete=True),
     ):
-        if not VerificarDM(inter):
-            return await inter.response.send_message(f"{negativo} Use este comando apenas em servidores", ephemeral=True)
-        
         if produto != "FaltamPermissoes":
             embed, components = Produto.ObterPainelGerenciarProduto(inter, produto)
             await inter.response.send_message(embed=embed, components=components, ephemeral=True)
@@ -1286,7 +1283,7 @@ class VendasCommand(commands.Cog):
     ):
         produtos_db = ObterDatabase()
 
-        if verificar_permissao(inter.user.id):
+        if Perms.VerificarPerms(inter.user.id):
             suggestions = [
                 disnake.OptionChoice(
                     name=f"🛒 {dados['nome']}",
@@ -1311,14 +1308,12 @@ class VendasCommand(commands.Cog):
         inter: disnake.ApplicationCommandInteraction,
         opcao: str = commands.Param(description="Selecione um produto e campo", autocomplete=True),
     ):
-        if not VerificarDM(inter):
-            return await inter.response.send_message(f"{negativo} Use este comando apenas em servidores", ephemeral=True)
+        if opcao == "FaltamPermissoes":
+            return await inter.response.send_message(f"{negativo} Faltam permissões.", ephemeral=True)
         
-        if opcao != "FaltamPermissoes":
-            produto_id, campo_id = opcao.split(":")
-            embed, components = Campo.ObterPainelGerenciarCampo(inter, produto_id, campo_id)
-            await inter.response.send_message(embed=embed, components=components, ephemeral=True)
-        else: await inter.response.send_message(f"{negativo} Faltam permissões.", ephemeral=True)
+        produto_id, campo_id = opcao.split(":")
+        embed, components = Campo.ObterPainelGerenciarCampo(inter, produto_id, campo_id)
+        await inter.response.send_message(embed=embed, components=components, ephemeral=True)
 
     @item.autocomplete("opcao")
     async def campo_autocomplete(
@@ -1326,7 +1321,7 @@ class VendasCommand(commands.Cog):
     ):
         produtos_db = ObterDatabase()
 
-        if verificar_permissao(inter.user.id):
+        if Perms.VerificarPerms(inter.user.id):
             suggestions = []
             for produto_id, produto_data in produtos_db.items():
                 nome_produto = produto_data["nome"]
@@ -1380,7 +1375,7 @@ class VendasCommand(commands.Cog):
             produtoID = inter.component.custom_id.replace("ApagarProduto_", "")
             Produto.Apagar(produtoID)
             await Produto.GerenciarProdutos(inter)
-            await SincronizarMensagens(inter, produtoID)
+            await Produto.SincronizarMensagens(inter, produtoID)
 
         elif inter.component.custom_id.startswith("GerenciarCupons_"):
             produtoID = inter.component.custom_id.replace("GerenciarCupons_", "")
@@ -1444,7 +1439,7 @@ class VendasCommand(commands.Cog):
 
         elif inter.component.custom_id.startswith("GerenciarEstoque_"):
             await inter.response.edit_message(f"{carregarAnimado} Carregando informações", embed=None, components=None)
-            if verificar_permissao(inter.user.id):
+            if Perms.VerificarPerms(inter.user.id):
                 _, produtoID, campoID = inter.component.custom_id.split("_")
                 embed, components = Campo.Estoque.ObterPainelGerenciarEstoque(inter, produtoID, campoID)
                 await inter.edit_original_message("", embed=embed, components=components)
@@ -1456,7 +1451,7 @@ class VendasCommand(commands.Cog):
             Campo.Estoque.ApagarEstoque(produtoID, campoID)
             embed, components = Campo.ObterPainelGerenciarCampo(inter, produtoID, campoID)
             await inter.edit_original_message("", embed=embed, components=components)
-            await SincronizarMensagens(inter, produtoID)
+            await Produto.SincronizarMensagens(inter, produtoID)
 
         elif inter.component.custom_id.startswith("AdicionarEstoqueFantasma_"):
             _, produtoID, campoID = inter.component.custom_id.split("_")
@@ -1484,7 +1479,7 @@ class VendasCommand(commands.Cog):
             
             item = Campo.Estoque.ObterItemEstoque(produtoID, campoID)
             await inter.response.send_message(f"{positivo} Seu item está pronto:\n```{item}```", ephemeral=True)
-            await SincronizarMensagens(inter, produtoID)
+            await Produto.SincronizarMensagens(inter, produtoID)
 
         elif inter.component.custom_id.startswith("EnviarArquivoEstoque_"):
             _, produtoID, campoID = inter.component.custom_id.split("_")
@@ -1502,7 +1497,7 @@ class VendasCommand(commands.Cog):
         elif inter.component.custom_id.startswith("SincronizarProduto_"):
             await inter.response.send_message(f"{carregarAnimado} Sincronizando mensagens", ephemeral=True)
             produtoID = inter.component.custom_id.replace("SincronizarProduto_", "")
-            await SincronizarMensagens(inter, produtoID)
+            await Produto.SincronizarMensagens(inter, produtoID)
             await inter.edit_original_message(f"{positivo} Mensagens sincronizadas com sucesso")
 
         elif inter.component.custom_id.startswith("AtivarDesativarEntregaAuto_"):
@@ -1546,7 +1541,7 @@ class VendasCommand(commands.Cog):
             channel = inter.values[0]
             produtoID = inter.component.custom_id.replace("EnviarProduto_", "")
             channel = inter.guild.get_channel(int(channel))
-            embed, components = GerarPainelProduto(inter, produtoID)
+            embed, components = Produto.GerarPainelProduto(inter, produtoID)
             msg = await channel.send(embed=embed, components=components)
 
             db = ObterDatabase()

@@ -1,18 +1,12 @@
 import disnake
 from disnake.ext import commands
-from Functions.CarregarEmojis import *
 
-with open("config.json") as config:
-    db = json.load(config)
-    owner = db["owner"]
+from Functions.CarregarEmojis import *
+from Functions.VerificarPerms import Perms
+from Functions.Database import Database
 
 def ObterMensagemPerm():
-    try:
-        with open("Database/perms.json") as permsFile:
-            perms = json.load(permsFile)
-    except FileNotFoundError:
-        perms = {}
-
+    perms = Database.Obter("Database/perms.json")
     usuarios = "\n".join([f"<@{user_id}>" for user_id in perms.keys()])
 
     if not usuarios:
@@ -34,32 +28,12 @@ class PermsCommand(commands.Cog):
         self.bot = bot
 
     @commands.slash_command()
-    async def perms(self, inter):
+    async def perms(self, inter: disnake.ApplicationCommandInteraction):
         """Use to manage the permissions"""
-
         await inter.response.defer(ephemeral=True)
 
-        if str(inter.user.id) == owner:
-            try:
-                with open("Database/perms.json") as permsFile:
-                    perms = json.load(permsFile)
-            except FileNotFoundError:
-                perms = {}
-
-            usuarios = "\n".join([f"<@{user_id}>" for user_id in perms.keys()])
-
-            if not usuarios:
-                usuarios = f"{negativo} Nenhum usuário possui permissões no momento."
-
-            embed = disnake.Embed(
-                description=f"`🔧` Usuários com permissão para usar o Bot:\n{usuarios}",
-                color=disnake.Color.dark_theme()
-            )
-            components = [
-                disnake.ui.Button(style=disnake.ButtonStyle.gray, label="Adicionar", emoji=mais2, custom_id="addMemberPerm"),
-                disnake.ui.Button(style=disnake.ButtonStyle.gray, label="Remover", emoji=menos2, custom_id="removeMemberPerm"),
-            ]
-
+        if Perms.VerificarOwner(inter.user.id):
+            embed, components = ObterMensagemPerm()
             await inter.followup.send(embed=embed, components=components, ephemeral=True)
 
         else:
@@ -67,18 +41,18 @@ class PermsCommand(commands.Cog):
 
     @commands.Cog.listener("on_button_click")
     async def permsListener(self, inter: disnake.MessageInteraction):
-        if inter.component.custom_id == "addMemberPerm":
+        if inter.component.custom_id == "Perms_addMemberPerm":
             components = disnake.ui.UserSelect(
-                custom_id="addMemberPermDropdown",
+                custom_id="Perms_addMemberPermDropdown",
                 placeholder="Escolha uma pessoa para adicionar",
                 max_values=1,
                 min_values=1
             )
             await inter.response.edit_message(components=components)
 
-        elif inter.component.custom_id == "removeMemberPerm":
+        elif inter.component.custom_id == "Perms_removeMemberPerm":
             components = disnake.ui.UserSelect(
-                custom_id="removeMemberPermDropdown",
+                custom_id="Perms_removeMemberPermDropdown",
                 placeholder="Escolha uma pessoa para remover",
                 max_values=1,
                 min_values=1
@@ -87,36 +61,22 @@ class PermsCommand(commands.Cog):
 
     @commands.Cog.listener("on_dropdown")
     async def addMemberListenerDropdown(self, inter: disnake.MessageInteraction):
-        if inter.component.custom_id == "addMemberPermDropdown":
-            try:
-                with open("Database/perms.json", "r") as config:
-                    dadosPerms = json.load(config)
-            except FileNotFoundError:
-                dadosPerms = {}
+        dadosPerms = Database.Obter("Database/perms.json")
 
+        if inter.component.custom_id == "Perms_addMemberPermDropdown":
             user_id = inter.values[0]
             dadosPerms[user_id] = user_id
-
-            with open("Database/perms.json", "w") as json_file:
-                json.dump(dadosPerms, json_file, indent=4)
+            Database.Salvar("Database/perms.json", dadosPerms)
 
             embed, components = ObterMensagemPerm()
             await inter.response.edit_message(embed=embed, components=components)
 
-        elif inter.component.custom_id == "removeMemberPermDropdown":
-            try:
-                with open("Database/perms.json", "r") as config:
-                    dadosPerms = json.load(config)
-            except FileNotFoundError:
-                dadosPerms = {}
-
+        elif inter.component.custom_id == "Perms_removeMemberPermDropdown":
             user_id = inter.values[0]
 
             if user_id in dadosPerms:
                 del dadosPerms[user_id]
-
-                with open("Database/perms.json", "w") as json_file:
-                    json.dump(dadosPerms, json_file, indent=4)
+                Database.Salvar("Database/perms.json", dadosPerms)
 
                 embed, components = ObterMensagemPerm()
                 await inter.response.edit_message(embed=embed, components=components)

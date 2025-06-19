@@ -10,7 +10,7 @@ import asyncio
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
 from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
 from Functions.CarregarEmojis import *
-from Functions.Config.FormasPagamentos import *
+from Functions.FormasPagamentos import *
 
 diretorio_atual = os.getcwd()
 caminho_p12 = os.path.join(diretorio_atual, "Database", "Vendas", "certificado.p12")

@@ -1,24 +1,21 @@
 from disnake import *
-import json
 from datetime import *
+from Functions.Database import Database
 
 ####################################################################################
 
 def ObterCanais():
-    with open("Database/Server/canais.json") as canais:
-        db = json.load(canais)
-        return db
+    db = Database.Obter("Database/Server/canais.json")
+    return db
 
 def ObterCargos():
-    with open("Database/Server/cargos.json") as canais:
-        db = json.load(canais)
-        return db
+    db = Database.Obter("Database/Server/cargos.json")
+    return db
 
 ####################################################################################
 
 def salvarCanaisDatabase(canais):
-    with open("Database/Server/canais.json", "w", encoding="utf-8") as arquivo:
-        json.dump(canais, arquivo, indent=4, ensure_ascii=False)
+    Database.Salvar("Database/Server/canais.json", canais)
 
 async def removerCanal(canal: str):
     canais = ObterCanais()
@@ -32,8 +29,7 @@ async def removerCanal(canal: str):
 ####################################################################################
 
 def salvarCargosDatabase(cargos):
-    with open("Database/Server/cargos.json", "w", encoding="utf-8") as arquivo:
-        json.dump(cargos, arquivo, indent=4, ensure_ascii=False)
+    Database.Salvar("Database/Server/cargos.json", cargos)
 
 async def removerCargo(cargo: str):
     cargos = ObterCargos()

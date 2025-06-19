@@ -43,7 +43,7 @@ class ConfigurarCommand(commands.Cog):
         """
         
         await inter.response.defer(ephemeral=True)
-        if verificar_permissao(inter.user.id):
+        if Perms.VerificarPerms(inter.user.id):
             embed, components = ObterPainelInicial()
             await inter.followup.send("https://imgur.com/My4fEV7", embed=embed, components=components)
         else:

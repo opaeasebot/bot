@@ -1,31 +1,20 @@
 import disnake
 from disnake.ext import commands
-from datetime import datetime, timedelta, timezone
-import json
-
+from Functions.Database import Database
 from Functions.CarregarEmojis import *
-
-def ObterDatabase():
-    with open("Database/Server/acoesauto.json") as f:
-        db = json.load(f)
-    return db
 
 async def AutoReaction(message: disnake.Message):
     try:
-        db = ObterDatabase()
+        db = Database.Obter("Database/Server/acoesauto.json")
         reacoes = db["reacoes"]
-        sistema = reacoes["sistema"]
-        canais = reacoes["canal"]
-        emoji = reacoes["emoji"]
+        sistema = reacoes["sistema"], canais = reacoes["canal"], emoji = reacoes["emoji"]
 
         if "ease" in message.content.lower():
-            try:
-                await message.add_reaction(emoji=ease)
+            try: await message.add_reaction(emoji=ease)
             except: pass
 
         if sistema:
-            if not canais:
-                return
+            if not canais: return
             
             for canal_id in canais:
                 try:
@@ -35,8 +24,7 @@ async def AutoReaction(message: disnake.Message):
                             await message.add_reaction(emoji=emoji)
                             break
                 except: pass
-        else:
-            return 
+        else: return 
     except: pass
     
 
