@@ -83,7 +83,7 @@ class CreateEmojis(commands.Cog):
         total_emojis = len(self.emojis)
         await inter.response.send_message(f"`🚀` Iniciando upload dos emojis para o bot (0/{total_emojis})", ephemeral=True)
 
-        if not verificar_owner(inter.user.id):
+        if not Perms.VerificarOwner(inter.user.id):
             await inter.edit_original_message("`❌` Você não tem permissão para executar essa ação.")
             return
 

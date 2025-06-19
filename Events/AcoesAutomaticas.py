@@ -4,7 +4,7 @@ from disnake import *
 import asyncio
 import json
 from datetime import datetime, timedelta
-from Functions.Config.Repostagem.Vendas import *
+from Functions.Repostagem.Repostagem import *
 
 # O auto-react ficou em Events/OnMessage, 
 # para aproveitar o Cog feito especialmente para esse tipo de sistema
@@ -20,7 +20,7 @@ async def acao_repostagem(bot):
         repostagem = db.get("repostagem", {})
 
         if repostagem.get("sistema", False):
-            await RepostagemTodasMensagensVendas(bot)
+            await Repostagem.Vendas.RepostagemTodasMensagensVendas(bot)
         await asyncio.sleep(5 * 60 * 60)
 
 async def acao_limpeza(bot: commands.Bot):

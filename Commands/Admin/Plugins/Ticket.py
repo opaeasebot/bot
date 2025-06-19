@@ -5,44 +5,11 @@ from disnake.ext import commands
 from disnake import *
 from Functions.CarregarEmojis import *
 from Functions.VerificarPerms import *
-from Functions.Config.Repostagem.Ticket import *
+from Functions.Repostagem.Repostagem import *
+from Utils.Ticket import *
 from datetime import datetime
 import random
 import string
-
-def ObterDatabase():
-    with open("Database/Tickets/ticket.json") as f:
-        db = json.load(f)
-        return db
-
-def ObterTicket(ticketID: str):
-    db = ObterDatabase()
-    try:
-        return db[ticketID]
-    except:
-        return None
-
-def ObterCategoria(ticketID: str, categoriaID: str):
-    ticket = ObterTicket(ticketID)
-    if not ticket: return None
-
-    try:
-        return ticket["categorias"][categoriaID]
-    except: return None
-
-def ObterTicketAberto(ticketID: str):
-    with open("Database/Tickets/ticketsAbertos.json") as f:
-        ticket = json.load(f)
-    
-    try:
-        if ticket[ticketID]:
-            return ticket[ticketID]
-        else:
-            return None
-    except: return None
-
-def GerarString():
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=13))
 
 def ObterPainelTicket(inter: disnake.MessageInteraction):
     db = ObterDatabase()
@@ -383,7 +350,7 @@ class Ticket():
         channelID = inter.values[0]
         channel = inter.guild.get_channel(int(channelID))
         try:
-            embed, components = GerarMensagemTicket(inter, ticketID)
+            embed, components = Repostagem.Ticket.GerarMensagemTicket(inter, ticketID)
             msg = await channel.send(embed=embed, components=components)
         except Exception as e:
             return await inter.edit_original_message(f"{negativo} Não foi possível enviar a mensagem para o canal. Tente novamente!")
@@ -887,7 +854,7 @@ class TicketCommand(commands.Cog):
         elif inter.component.custom_id.startswith("SincronizarTicket_"):
             ticketID = inter.component.custom_id.replace("SincronizarTicket_", "")
             await inter.response.send_message(f"{carregarAnimado} Sincronizando mensagens...", ephemeral=True)
-            await SincronizarTicket(inter, ticketID)
+            await Repostagem.Ticket.SincronizarTicket(inter, ticketID)
 
         elif inter.component.custom_id.startswith("AbrirTicketCategoria_"):
             _, ticketID, categoriaID = inter.component.custom_id.split("_")

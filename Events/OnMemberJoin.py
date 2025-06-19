@@ -1,140 +1,125 @@
+import json
 import disnake
 from disnake.ext import commands
-from datetime import datetime, timedelta, timezone
+from disnake import ui, ButtonStyle, Embed, Member
+from datetime import datetime, timezone
+
 from Functions.CarregarEmojis import *
-import json
+from Functions.Database import Database
 
-async def AutoRole(member: disnake.Member):
-    try:
-        with open("Database/Server/cargos.json", "r") as f:
-            db = json.load(f)
-            cargo_id = db.get("membro", None)
+class OnMemberJoin:
+    @staticmethod
+    async def AutoRole(member: Member):
+        try:
+            with open("Database/Server/cargos.json", "r") as f:
+                cargos_db = json.load(f)
+                cargo_id = cargos_db.get("membro")
 
-        with open("Database/Server/boasvindas.json") as file:
-            db2 = json.load(file)
-            sistema = db2["funcoes"]["autoRole"]["membro"]
-        
-        if sistema == True:
+            with open("Database/Server/boasvindas.json", "r") as f:
+                boasvindas_db = json.load(f)
+                sistema = boasvindas_db["funcoes"]["autoRole"]["membro"]
 
-            if cargo_id:
+            if sistema and cargo_id:
                 cargo = member.guild.get_role(int(cargo_id))
                 if cargo:
                     await member.add_roles(cargo, reason="[Ease Bot] Sistema de Auto Role")
-                    return
-                else:
-                    return
-            else:
+        except:
+            return
+
+    @staticmethod
+    async def MensagemBoasVindas(member: Member):
+        try:
+            with open("Database/Server/canais.json", "r") as f:
+                canais_db = json.load(f)
+                canal_id = canais_db.get("boasvindas")
+
+            with open("Database/Server/boasvindas.json", "r") as f:
+                boasvindas_db = json.load(f)
+                sistema_ativado = boasvindas_db["mensagens"]["boas-vindas"]["mensagem"]
+
+            if not (sistema_ativado and canal_id):
                 return
-        
-        else: return
-    except: return
 
-async def MensagemBoasVindas(member: disnake.Member):
-    try:
-        with open("Database/Server/canais.json") as canais:
-            canaisdb = json.load(canais)
-            canal_id = canaisdb["boasvindas"]
-
-        with open("Database/Server/boasvindas.json", "r") as f:
-            db = json.load(f)
-            sistema_ativado = db["mensagens"]["boas-vindas"]["mensagem"]
-        
-        if sistema_ativado and canal_id:
             canal = member.guild.get_channel(int(canal_id))
-            if canal:
-                content = db["mensagens"]["boas-vindas"]["estiloMensagem"]["content"]
-                deleteafter = db["mensagens"]["boas-vindas"]["tempoApagar"]
+            if not canal:
+                return
 
-                if deleteafter == "":
-                    deleteafter = None
-                else: deleteafter = int(deleteafter)
+            estilo = boasvindas_db["mensagens"]["boas-vindas"]["estiloMensagem"]
+            delete_after = boasvindas_db["mensagens"]["boas-vindas"]["tempoApagar"]
+            delete_after = int(delete_after) if delete_after else None
 
-                content_preview = (
-                    content.replace("{mencao}", member.mention)
+            content = estilo["content"]
+            content = (
+                content.replace("{mencao}", member.mention)
                     .replace("{nome}", member.name)
                     .replace("{servidor}", member.guild.name)
-                )
-                button = disnake.ui.Button(
-                    label="Mensagem do Sistema",
-                    style=disnake.ButtonStyle.gray,
-                    disabled=True
-                )
+            )
 
-                await canal.send(content=content_preview, components=[button], delete_after=deleteafter)
-            else:
-                return
-        else:
+            button = ui.Button(
+                label="Mensagem do Sistema",
+                style=ButtonStyle.gray,
+                disabled=True
+            )
+
+            await canal.send(content=content, components=[button], delete_after=delete_after)
+        except:
             return
-    except: return
 
-async def AntiFake(member: disnake.Member):
-    try:
-        with open("Database/Server/antifake.json") as f:
-            db = json.load(f)
+    @staticmethod
+    async def AntiFake(member: Member):
+        try:
+            antifake_db = Database.Obter("Database/Server/antifake.json")
+            canais_db = Database
+            with open("Database/Server/canais.json", "r") as f:
+                canais_db = json.load(f)
 
-        with open("Database/Server/canais.json") as f2:
-            db2 = json.load(f2)
-        
-        canal = db2["antifake"]
-        if canal != "":
-            canal = int(canal)
-        else:
-            canal = None
-        
-        if canal:
-            channel = member.guild.get_channel(canal)
+            canal_id = canais_db.get("antifake")
+            canal_id = int(canal_id) if canal_id else None
+            channel = member.guild.get_channel(canal_id) if canal_id else None
 
-        quantidade_minima = db.get("quantidadeMinima", 0)
-        nomes_bloqueados = db.get("nomesBloqueados", [])
+            quantidade_minima = antifake_db.get("quantidadeMinima", 0)
+            quantidade_minima = int(quantidade_minima) if quantidade_minima else 0
 
-        if quantidade_minima == "":
-            quantidade_minima = 0
-        else: quantidade_minima = int(quantidade_minima)
+            nomes_bloqueados = antifake_db.get("nomesBloqueados", [])
 
-        if member.name in nomes_bloqueados:
-            await member.send(f"Você foi expulso do servidor: ``{member.guild.name}``\nMotivo: ``Sistema de Anti Fake``")
-            await member.kick(reason="[Ease Bot] Sistema de Anti Fake")
-        elif member.display_name in nomes_bloqueados:
-            await member.send(f"Você foi expulso do servidor: ``{member.guild.name}``\nMotivo: ``Sistema de Anti Fake``")
-            await member.kick(reason="[Ease Bot] Sistema de Anti Fake")
+            if member.name in nomes_bloqueados or member.display_name in nomes_bloqueados:
+                await member.send(f"Você foi expulso do servidor: `{member.guild.name}`\nMotivo: `Sistema de Anti Fake`")
+                await member.kick(reason="[Ease Bot] Sistema de Anti Fake")
 
-        if quantidade_minima > 0:
-            account_age = datetime.now(timezone.utc) - member.created_at
-            account_age_days = account_age.days
+            if quantidade_minima > 0:
+                dias = (datetime.now(timezone.utc) - member.created_at).days
+                if dias < quantidade_minima:
+                    await member.send(
+                        f"Você foi expulso do servidor: `{member.guild.name}`\n"
+                        f"Motivo: `Sistema de Anti Fake`\n"
+                        f"Sua conta foi criada há menos de {quantidade_minima} dias."
+                    )
+                    await member.kick(reason="[Ease Bot] Sistema de Anti Fake - Conta nova demais")
 
-            if account_age_days < quantidade_minima:
-                await member.send(f"Você foi expulso do servidor: ``{member.guild.name}``\nMotivo: ``Sistema de Anti Fake``\nSua conta foi criada há menos de {quantidade_minima} dias.")
-                await member.kick(reason="[Ease Bot] Sistema de Anti Fake - Conta nova demais")
-        else:
+            if channel:
+                embed = Embed(
+                    title="Anti Fake | Expulsão",
+                    description="Uma pessoa foi expulsa por um valor definido no Anti-Fake.\nVeja abaixo as informações",
+                    timestamp=datetime.now(),
+                    color=disnake.Color(0x00FFFF)
+                )
+                embed.add_field(name="Quem foi expulso", value=f"{member.mention}\n({member.id})", inline=True)
+                embed.add_field(name="Quando foi expulso?", value=f"<t:{int(datetime.now().timestamp())}:D>")
+                await channel.send(embed=embed)
+        except:
             pass
 
-        embed = disnake.Embed(
-            title="Anti Fake | Expulsão",
-            description="Uma pessoa foi expulsa por um valor definido no Anti-Fake.\nVeja abaixo as informações",
-            timestamp=datetime.now(),
-            color=disnake.Color(0x00FFFF)
-        )
-        embed.add_field(
-            name="Quem foi expulso",
-            value=f"{member.mention}\n({member.id})",
-            inline=True
-        )
-        embed.add_field(
-            name="Quando foi expulso?",
-            value=f"<t:{int(datetime.now().timestamp())}:D>"
-        )
-        await channel.send(embed=embed)
-    except: pass
-    
+
 class EventsOnMemberJoin(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener("on_member_join")
-    async def MemberJoinListener(self, member: disnake.Member):
-        await AutoRole(member)
-        await MensagemBoasVindas(member)
-        await AntiFake(member)
+    async def MemberJoinListener(self, member: Member):
+        await OnMemberJoin.AutoRole(member)
+        await OnMemberJoin.MensagemBoasVindas(member)
+        await OnMemberJoin.AntiFake(member)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(EventsOnMemberJoin(bot))

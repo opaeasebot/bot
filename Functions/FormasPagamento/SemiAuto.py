@@ -6,7 +6,7 @@ import re
 from datetime import *
 
 from Functions.CarregarEmojis import *
-from Functions.Config.FormasPagamentos import *
+from Functions.FormasPagamentos import *
 
 def salvarSemi(tipo_chave, chavePIX):
     try:

@@ -122,7 +122,7 @@ class Status():
             with open("config.json", "w") as f:
                 json.dump(config, f, indent=4)
 
-            type, activity = obter_status()
+            type, activity = OnBotStart.ObterStatus()
             await self.bot.change_presence(
                 status=type,
                 activity=activity
@@ -206,7 +206,7 @@ class PersonalizaçãoCommand(commands.Cog):
             with open("config.json", "w") as f:
                 json.dump(config, f, indent=4)
             
-            type, activity = obter_status()
+            type, activity = OnBotStart.ObterStatus()
             await self.bot.change_presence(
                 status=type,
                 activity=activity

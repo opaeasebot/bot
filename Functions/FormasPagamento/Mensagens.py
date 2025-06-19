@@ -4,31 +4,7 @@ from disnake import *
 from datetime import *
 
 from Functions.CarregarEmojis import *
-
-def ObterProduto(produtoID):
-    with open("Database/Vendas/produtos.json") as f:
-        db = json.load(f)
-        try:
-            produto = db[produtoID]
-        except:
-            produto = None
-        return produto
-
-def ObterCampo(produtoID, campoID):
-    with open("Database/Vendas/produtos.json") as f:
-        db = json.load(f)
-        try:
-            produto = db[produtoID]
-            campo = produto["campos"][campoID]
-        except:
-            campo = None
-        return campo
-
-def ObterCarrinho(carrinhoID):
-    with open("Database/Vendas/carrinhos.json") as f:
-        db = json.load(f)
-        carrinho = db[carrinhoID]
-        return carrinho
+from Utils.Produto import *
 
 def ObterMensagemLogs(inter: disnake.CommandInteraction, type: str, carrinhoID):
     carrinho = ObterCarrinho(carrinhoID)

@@ -1,26 +1,19 @@
 import json
 import disnake
 
-def verificar_permissao(user_id):
-    try:
-        with open("Database/perms.json", "r") as perms_file:
-            perms = json.load(perms_file)
-    except FileNotFoundError:
-        return False
+from Functions.Database import Database
 
-    return str(user_id) in perms
+class Perms:
+    @staticmethod
+    def VerificarPerms(user_id) -> bool:
+        perms = Database.Obter("Database/perms.json")
+        return str(user_id) in perms
 
-def VerificarDM(inter: disnake.MessageInteraction):
-    try:
-        nome = inter.guild.name
-    except:
-        return False
-    
-    if not nome: return False
-    return True
+    @staticmethod
+    def VerificarDM(inter: disnake.MessageInteraction) -> bool:
+        return inter.guild is not None and inter.guild.name is not None
 
-def verificar_owner(user_id):
-    with open("config.json", "r") as config_file:
-        config = json.load(config_file)
-
-    return str(user_id) == str(config["owner"])
+    @staticmethod
+    def VerificarOwner(user_id) -> bool:
+        config = Database.Obter("config.json")
+        return str(user_id) == str(config["owner"])
